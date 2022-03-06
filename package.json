@@ -16,6 +16,7 @@
     "framer-motion": "^6.2.8",
     "husky": "^7.0.4",
     "next": "12.0.7",
+    "random-words": "^1.1.2",
     "react": "17.0.2",
     "react-dom": "17.0.2"
   },
@@ -23,6 +24,7 @@
     "@testing-library/jest-dom": "^5.16.1",
     "@testing-library/react": "^12.1.2",
     "@types/node": "16.11.12",
+    "@types/random-words": "^1.1.2",
     "@types/react": "17.0.37",
     "babel-jest": "^27.4.4",
     "eslint": "8.4.1",

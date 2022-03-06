@@ -3,9 +3,18 @@ import Head from "next/head";
 import Image from "next/image";
 import styles from "../styles/Home.module.css";
 import Nav from '../components/Nav'
-import {Box, Center,Flex, Container} from "@chakra-ui/react"
+import {Box, Center,Flex, Container, Input, FormControl, FormLabel, FormErrorMessage, FormHelperText, Button} from "@chakra-ui/react"
+import { useRouter } from "next/router";
+import {useState} from 'react'
+import randomWords from 'random-words'
 
 const Home: NextPage = () => {
+    const [username, setUsername] = useState<string>("");
+    const router = useRouter();
+    function createRoom (){
+        const newRoomId = randomWords({exactly: 3, join: '-'});
+        router.push(`/${newRoomId}`)
+    }
   return (
     <div className={styles.container}>
       <Head>
@@ -14,7 +23,10 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
         <Nav/>
-        <Container h="80vh"><Flex h="100%" direction="row" justify="center" align="center" ><h1>Hello</h1></Flex></Container>
+        <Container h="80vh"><Flex h="100%" direction="column" justify="center" align="center" ><FormControl isRequired>
+            <FormLabel htmlFor='first-name'>Username</FormLabel>
+            <Input  id='user-name' placeholder='Username' />
+        </FormControl><Button onClick={createRoom} mt="20px">Create Room</Button></Flex></Container>
     </div>
   );
 };
