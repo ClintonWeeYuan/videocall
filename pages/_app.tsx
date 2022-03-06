@@ -2,6 +2,7 @@ import '../styles/globals.css'
 import type { AppProps } from 'next/app'
 import { ChakraProvider } from '@chakra-ui/react'
 import { extendTheme } from '@chakra-ui/react'
+import {UserProvider} from '../components/UserContext'
 
 const colors = {
   brand: {
@@ -14,7 +15,7 @@ const colors = {
 const theme = extendTheme({ colors })
 
 function MyApp({ Component, pageProps }: AppProps) {
-  return (<ChakraProvider theme={theme}><Component {...pageProps} /></ChakraProvider>)
+  return (<UserProvider><ChakraProvider theme={theme}><Component {...pageProps} /></ChakraProvider></UserProvider>)
 }
 
 export default MyApp

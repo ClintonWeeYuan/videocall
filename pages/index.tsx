@@ -7,12 +7,16 @@ import {Box, Center,Flex, Container, Input, FormControl, FormLabel, FormErrorMes
 import { useRouter } from "next/router";
 import {useState} from 'react'
 import randomWords from 'random-words'
+import {UpdateUser} from '../components/UserContext'
 
 const Home: NextPage = () => {
     const [username, setUsername] = useState<string>("");
     const router = useRouter();
+    const updateUsername = UpdateUser();
+
     function createRoom (){
         const newRoomId = randomWords({exactly: 3, join: '-'});
+        updateUsername(username);
         router.push(`/${newRoomId}`)
     }
   return (
@@ -25,7 +29,7 @@ const Home: NextPage = () => {
         <Nav/>
         <Container h="80vh"><Flex h="100%" direction="column" justify="center" align="center" ><FormControl isRequired>
             <FormLabel htmlFor='first-name'>Username</FormLabel>
-            <Input  id='user-name' placeholder='Username' />
+            <Input onChange={(e)=>setUsername(e.target.value)}  id='user-name' placeholder='Username' />
         </FormControl><Button onClick={createRoom} mt="20px">Create Room</Button></Flex></Container>
     </div>
   );
