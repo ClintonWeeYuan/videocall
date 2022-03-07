@@ -14,6 +14,11 @@ import {
 import Nav from '../components/Nav'
 import {UpdateUser, User} from '../components/UserContext'
 import {useState} from "react";
+import dynamic from "next/dynamic";
+
+const VideoRoom = dynamic(() => import("../components/VideoRoom"), {
+    ssr: false,
+});
 
 
 const Room: NextPage = () => {
@@ -38,6 +43,7 @@ const Room: NextPage = () => {
                     navigator.clipboard.writeText(`http://localhost:3000/${router.query.room}`)
                 }}>Copy Link</Button>
             </Flex>
+            <VideoRoom username={name}/>
         </Container></div>)
 }
 
