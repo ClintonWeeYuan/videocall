@@ -1,8 +1,10 @@
 import React from "react";
-import { useState, useContext } from "react";
+import {useState, useContext} from "react";
+import type {NextPage} from "next";
 
 const UserContext = React.createContext<string>('');
-const UpdateUserContext = React.createContext((name: string)=>{});
+const UpdateUserContext = React.createContext((name: string) => {
+});
 
 export function User() {
     return useContext(UserContext);
@@ -14,10 +16,11 @@ export function UpdateUser() {
 
 export const UserProvider: NextPage = (props: any) => {
     const [username, setUsername] = useState<string>('No Username')
+    
     function updateUser(name: string) {
         setUsername(name);
     }
-
+    
     return (
         <UserContext.Provider value={username}>
             <UpdateUserContext.Provider value={updateUser}>
