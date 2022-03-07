@@ -1,16 +1,44 @@
-import { useRouter } from "next/router";
+import {useRouter} from "next/router";
 import {NextPage} from "next";
-import {Container, Box, Button} from "@chakra-ui/react"
+import {
+    Container,
+    Flex,
+    Box,
+    Button,
+    FormControl,
+    FormLabel,
+    Input,
+    InputGroup,
+    InputRightElement
+} from "@chakra-ui/react"
 import Nav from '../components/Nav'
-import {User} from '../components/UserContext'
+import {UpdateUser, User} from '../components/UserContext'
+import {useState} from "react";
 
 
-
-const Room : NextPage = () => {
-    const username = User();
+const Room: NextPage = () => {
     const router = useRouter();
-    return(<div><Nav/>
-        <Container><h1>Room Id: {router.query.room}</h1><h2>Username: {username}</h2><Button onClick={() => {navigator.clipboard.writeText(`http://localhost:3000/${router.query.room}`)}}>Copy Link</Button></Container></div>)
+    const [username, setUsername] = useState<string>("");
+    const updateUsername = UpdateUser();
+    const name = User()
+    return (<div>
+        <Nav/>
+        <Container p={100}>
+            <FormControl isRequired>
+                <FormLabel htmlFor='first-name'>Username</FormLabel>
+                
+                <Input pr="0" onChange={(e) => setUsername(e.target.value)} id='user-name'
+                       placeholder='Username'/>
+            
+            
+            </FormControl>
+            <Flex mt={3} w={400}>
+                <Button onClick={() => updateUsername(username)}>Enter Room</Button>
+                <Button ml={20} onClick={() => {
+                    navigator.clipboard.writeText(`http://localhost:3000/${router.query.room}`)
+                }}>Copy Link</Button>
+            </Flex>
+        </Container></div>)
 }
 
 export default Room;
