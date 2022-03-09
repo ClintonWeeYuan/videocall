@@ -1,8 +1,9 @@
 import {NextPage} from "next";
 import {Box, Text} from '@chakra-ui/react'
 import Pusher from "pusher-js";
-import {useState, useEffect, useRef} from 'react'
+import {useEffect, useRef, useState} from 'react'
 import {useRouter} from 'next/router'
+
 
 type Props = {
   username: string;
@@ -22,7 +23,7 @@ const VideoRoom: NextPage<Props> = ({username}) => {
   const [remotePeerId, setRemotePeerId] = useState<string>([]);
   const [userId, setUserId] = useState<string>("");
   const [peerMedia, setPeerMedia] = useState([]);
-  const userVideo = useRef(null);
+  const userVideo = useRef<HTMLVideoElement>(null);
   const router = useRouter();
   
   const peerInstance = useRef(null);
@@ -60,15 +61,56 @@ const VideoRoom: NextPage<Props> = ({username}) => {
       });
     }
     
+    
     return () => {
       pusher.unsubscribe("presence-channel");
       mounted = false;
     };
   }, []);
   
-  return (<Box><Text>Hello {username}</Text>{onlineUsers.map((user, id) => {
-    return (<Box key={id}>{user}</Box>)
-  })}</Box>)
+  //Get Media Stream Function
+  async function getMedia() {
+    let stream = null;
+    // var getUserMedia =
+    //   navigator.mediaDevices.getUserMedia ||
+    //   navigator.mediaDevices.webkitGetUserMedia ||
+    //   navigator.mediaDevices.mozGetUserMedia;
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: true,
+      });
+      return stream;
+    }
+    catch (err) {
+      console.log(err);
+    }
+  }
+  
+  //Gets User's Own Video Stream
+  useEffect(() => {
+    async function startMedia() {
+      const stream = await getMedia();
+      if (userVideo.current && stream) {
+        userVideo.current.srcObject = stream;
+      }
+    }
+    
+    startMedia();
+  }, []);
+  
+  return (<Box><Text>Hello {username}</Text>
+    <Box>
+      <video ref={userVideo}
+             autoPlay={true}
+             height="250px"
+             width="300px"
+             muted={true}></video>
+    </Box>
+    
+    {onlineUsers.map((user, id) => {
+      return (<Box key={id}>{user}</Box>)
+    })}</Box>)
 }
 
 export default VideoRoom
