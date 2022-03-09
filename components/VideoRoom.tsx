@@ -1,13 +1,20 @@
 import {NextPage} from "next";
-import {Box, Text} from '@chakra-ui/react'
+import {Box, Text, Button} from '@chakra-ui/react'
 import Pusher from "pusher-js";
 import {useEffect, useRef, useState} from 'react'
 import {useRouter} from 'next/router'
+import Peer from "peerjs";
 
 
 type Props = {
   username: string;
 }
+
+interface PeerObject {
+  peerId: string;
+  username: string;
+}
+
 const VideoRoom: NextPage<Props> = ({username}) => {
   const pusher = new Pusher(process.env.NEXT_PUBLIC_KEY ? process.env.NEXT_PUBLIC_KEY : '', {
     cluster: "ap1",
@@ -20,13 +27,14 @@ const VideoRoom: NextPage<Props> = ({username}) => {
   const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
   
   //Peer and Video States
-  const [remotePeerId, setRemotePeerId] = useState<string>([]);
+  const [remotePeerId, setRemotePeerId] = useState<string[]>([]);
   const [userId, setUserId] = useState<string>("");
-  const [peerMedia, setPeerMedia] = useState([]);
+  const [peerMedia, setPeerMedia] = useState<MediaStream[]>([]);
   const userVideo = useRef<HTMLVideoElement>(null);
   const router = useRouter();
+  const [peers, setPeers] = useState<PeerObject[]>([]);
   
-  const peerInstance = useRef(null);
+  const peerInstance = useRef<object>();
   const remotePeerInstance = useRef(null);
   
   useEffect(() => {
@@ -48,6 +56,10 @@ const VideoRoom: NextPage<Props> = ({username}) => {
       channel.bind("pusher:member_added", async (member) => {
         setOnlineUsersCount(channel.members.count);
         setOnlineUsers((prevState) => [...prevState, member.info.username]);
+        setPeers((prevState) => [
+          ...prevState,
+          {peerId: member.id, username: member.info.username},
+        ]);
         console.log("New User Entered the Chat");
       });
       
@@ -67,6 +79,64 @@ const VideoRoom: NextPage<Props> = ({username}) => {
       mounted = false;
     };
   }, []);
+  
+  //Creates own Peer Id from Member Id
+  useEffect(() => {
+    async function createPeer() {
+      if (userId) {
+        const peer = new Peer(userId);
+        peerInstance.current = peer;
+        peer.on("open", (id) => {
+          console.log("My peer id is " + id);
+        });
+        
+        peer.on("call", async function (call) {
+          console.log("Someone is attempting to call you");
+          const stream = await getMedia();
+          call.answer(stream);
+          call.on("stream", function (remoteStream) {
+            // remotePeerInstance.current.srcObject = remoteStream;
+            setPeerMedia((prevState) => [...prevState, remoteStream]);
+          });
+        });
+        
+        peer.on("error", (err) => {
+          console.log(err);
+        });
+        
+        peer.on("disconnected", () => {
+          console.log("Peer connection disconnected");
+        });
+        
+        peer.on("close", () => {
+          console.log("Peer Connection is Closed");
+        });
+        
+        // await axios.post("/api/pusher/newmember", { userId });
+      }
+    }
+    
+    createPeer();
+  }, [userId]);
+  
+  //Call People Function
+  const callPeer = (remotePeerId: string) => {
+    console.log("Calling " + remotePeerId);
+    
+    async function call() {
+      const stream = await getMedia();
+      if (peerInstance.current) {
+        const mediaConnection = peerInstance.current.call(remotePeerId, stream);
+        mediaConnection.on("stream", function (remoteStream: MediaStream) {
+          // remotePeerInstance.current.srcObject = remoteStream;
+          setPeerMedia((prevState) => [...prevState, remoteStream]);
+        });
+      }
+    }
+    
+    call();
+    
+  };
   
   //Get Media Stream Function
   async function getMedia() {
@@ -110,7 +180,15 @@ const VideoRoom: NextPage<Props> = ({username}) => {
     
     {onlineUsers.map((user, id) => {
       return (<Box key={id}>{user}</Box>)
-    })}</Box>)
+    })} <Button
+      onClick={() =>
+        peers.forEach((peer) => {
+          callPeer(peer.peerId);
+        })
+      }
+    >
+      Call Everyone
+    </Button></Box>)
 }
 
 export default VideoRoom
