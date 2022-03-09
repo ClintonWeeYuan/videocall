@@ -1,6 +1,7 @@
 import React from "react";
 import {useState, useContext} from "react";
 import type {NextPage} from "next";
+import {Box} from "@chakra-ui/react";
 
 const UserContext = React.createContext<string>('');
 const UpdateUserContext = React.createContext((name: string) => {
@@ -25,6 +26,7 @@ export const UserProvider: NextPage = (props: any) => {
         <UserContext.Provider value={username}>
             <UpdateUserContext.Provider value={updateUser}>
                 {props.children}
+            
             </UpdateUserContext.Provider>
         </UserContext.Provider>
     );
