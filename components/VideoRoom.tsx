@@ -4,16 +4,41 @@ import Pusher from "pusher-js";
 import {useEffect, useRef, useState} from 'react'
 import {useRouter} from 'next/router'
 import Peer from "peerjs";
-
+import * as PusherTypes from 'pusher-js';
 
 type Props = {
   username: string;
+}
+type VideoProps = {
+  stream: MediaStream;
+}
+
+interface PeerMediaStreams {
+  [id: string]: MediaStream;
 }
 
 interface PeerObject {
   peerId: string;
   username: string;
 }
+
+const Video: NextPage<VideoProps> = ({stream}) => {
+  const ref = useRef<HTMLVideoElement>(null);
+  useEffect(() => {
+    if (ref.current) {
+      ref.current.srcObject = stream;
+    }
+  }, [stream]);
+  return (
+    <video
+      ref={ref}
+      autoPlay={true}
+      controls={false}
+      height="300px"
+      width="400px"
+    ></video>
+  );
+};
 
 const VideoRoom: NextPage<Props> = ({username}) => {
   const pusher = new Pusher(process.env.NEXT_PUBLIC_KEY ? process.env.NEXT_PUBLIC_KEY : '', {
@@ -29,11 +54,11 @@ const VideoRoom: NextPage<Props> = ({username}) => {
   //Peer and Video States
   const [remotePeerId, setRemotePeerId] = useState<string[]>([]);
   const [userId, setUserId] = useState<string>("");
-  const [peerMedia, setPeerMedia] = useState<MediaStream[]>([]);
+  // const [peerMedia, setPeerMedia] = useState<MediaStream[]>([]);
+  const [peerMedia, setPeerMedia] = useState<PeerMediaStreams>({});
   const userVideo = useRef<HTMLVideoElement>(null);
   const router = useRouter();
   const [peers, setPeers] = useState<PeerObject[]>([]);
-  
   const peerInstance = useRef<object>();
   const remotePeerInstance = useRef(null);
   
@@ -43,7 +68,7 @@ const VideoRoom: NextPage<Props> = ({username}) => {
       const channel = pusher.subscribe("presence-channel");
       //When user subscribes to channel
       
-      channel.bind("pusher:subscription_succeeded", (members) => {
+      channel.bind("pusher:subscription_succeeded", (members: PusherTypes.Members) => {
         console.log("Subscribed to channel")
         setOnlineUsersCount(members.count);
         members.each((member) => {
@@ -56,6 +81,7 @@ const VideoRoom: NextPage<Props> = ({username}) => {
       channel.bind("pusher:member_added", async (member) => {
         setOnlineUsersCount(channel.members.count);
         setOnlineUsers((prevState) => [...prevState, member.info.username]);
+        
         setPeers((prevState) => [
           ...prevState,
           {peerId: member.id, username: member.info.username},
@@ -96,7 +122,7 @@ const VideoRoom: NextPage<Props> = ({username}) => {
           call.answer(stream);
           call.on("stream", function (remoteStream) {
             // remotePeerInstance.current.srcObject = remoteStream;
-            setPeerMedia((prevState) => [...prevState, remoteStream]);
+            setPeerMedia(prevState => ({...prevState, [call.peer]: remoteStream}))
           });
         });
         
@@ -129,7 +155,10 @@ const VideoRoom: NextPage<Props> = ({username}) => {
         const mediaConnection = peerInstance.current.call(remotePeerId, stream);
         mediaConnection.on("stream", function (remoteStream: MediaStream) {
           // remotePeerInstance.current.srcObject = remoteStream;
-          setPeerMedia((prevState) => [...prevState, remoteStream]);
+          // setPeerMedia((prevState) =>
+          //   [...prevState, remoteStream]);
+          setPeerMedia(prevState => ({...prevState, [remotePeerId]: remoteStream}))
+          
         });
       }
     }
@@ -180,10 +209,23 @@ const VideoRoom: NextPage<Props> = ({username}) => {
     
     {onlineUsers.map((user, id) => {
       return (<Box key={id}>{user}</Box>)
-    })} <Button
+    })}
+    {Object.values(peerMedia).map((stream, index) => {
+      return (
+        <div key={index} style={{border: "1px solid red"}}>
+          <Video stream={stream}/>
+        </div>
+      );
+    })}
+    
+    
+    <Button
       onClick={() =>
         peers.forEach((peer) => {
+          console.log(peer.peerId)
           callPeer(peer.peerId);
+          
+          
         })
       }
     >
