@@ -30,12 +30,13 @@ const Room: NextPage = () => {
     <Grid
       h='90vh'
       templateRows='repeat(3, 1fr)'
-      templateColumns={{sm: 'repeat(5, 1fr)', md: 'repeat(7, 1fr)'}}
+      templateColumns={{base: 'repeat(5, 1fr)', md: 'repeat(7, 1fr)'}}
       gap={4}
     >
-      <GridItem display={{sm: 'none', md: 'block'}} rowSpan={3} colSpan={1}><Flex direction="column" justify="center"
-                                                                                  align="center"><Heading size="medium"
-                                                                                                          p={5}>Online
+      <GridItem display={{base: 'none', md: 'block'}} rowSpan={3} colSpan={1}><Flex direction="column" justify="center"
+                                                                                    align="center"><Heading
+        size="medium"
+        p={5}>Online
         Users</Heading><List spacing={3} p={3}>
         <ListItem>
           <ListIcon as={CheckCircleIcon} color='green.500'/>
@@ -69,7 +70,7 @@ const Room: NextPage = () => {
         
         </Flex></Container>)}
       </GridItem>
-      <GridItem display={{sm: 'none', md: 'block'}} rowSpan={3} colSpan={1}/>
+      <GridItem display={{base: 'none', md: 'block'}} rowSpan={3} colSpan={1}/>
     
     </Grid>
   
