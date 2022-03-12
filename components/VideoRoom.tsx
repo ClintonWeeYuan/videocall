@@ -1,5 +1,13 @@
 import {NextPage} from "next";
-import {Box, Text, Button, useToast, Grid, GridItem, SimpleGrid} from '@chakra-ui/react'
+import {
+  Box, Text, Button, useToast, Grid, GridItem, SimpleGrid, Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
+} from '@chakra-ui/react'
 import Pusher from "pusher-js";
 import {useEffect, useRef, useState} from 'react'
 import {useRouter} from 'next/router'
@@ -216,13 +224,43 @@ const VideoRoom: NextPage<Props> = ({username}) => {
     startMedia();
   }, []);
   
-  return (<SimpleGrid columns={{sm: 2, md: 3}} spacing='10px' p={50}>
+  //Modal Control
+  
+  const [isOpen, setIsOpen] = useState<boolean>(true);
+  const callEveryone = () => {
+    peers.forEach((peer) => {
+        //       console.log(peer.peerId)
+        //       callPeer(peer.peerId);
+      }
+    );
+    setIsOpen(false);
+  }
+  
+  return (<Box> <Modal isOpen={isOpen} onClose={() => setIsOpen(false)}>
+    <ModalOverlay/>
+    <ModalContent>
+      <ModalHeader>Modal Title</ModalHeader>
+      <ModalCloseButton/>
+      <ModalBody>
+        <Text>Would you like to enter the call?</Text>
+      </ModalBody>
+      
+      <ModalFooter>
+        <Button colorScheme='blue' mr={3} onClick={callEveryone}>
+          Join Audio
+        </Button>
+      </ModalFooter>
+    </ModalContent>
+  </Modal><SimpleGrid columns={{sm: 2, md: 3}} spacing='10px' p={50}>
     <Box bg='white' height='200px'></Box>
     <Box bg='white' height='200px'></Box>
     <Box bg='white' height='200px'></Box>
     <Box bg='white' height='200px'></Box>
     <Box bg='white' height='200px'></Box>
-  </SimpleGrid>)
+    <Box bg='white' height='200px'></Box>
+  </SimpleGrid>
+  
+  </Box>)
   // <Box>
   //   <video ref={userVideo}
   //          autoPlay={true}
