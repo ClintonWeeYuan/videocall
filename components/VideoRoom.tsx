@@ -6,6 +6,7 @@ import {useRouter} from 'next/router'
 import Peer from "peerjs";
 import * as PusherTypes from 'pusher-js';
 
+
 type Props = {
   username: string;
 }
@@ -65,7 +66,7 @@ const VideoRoom: NextPage<Props> = ({username}) => {
   useEffect(() => {
     let mounted = true;
     if (mounted) {
-      const channel = pusher.subscribe("presence-channel");
+      const channel: PusherTypes.Channel = pusher.subscribe("presence-channel");
       //When user subscribes to channel
       
       channel.bind("pusher:subscription_succeeded", (members: PusherTypes.Members) => {
