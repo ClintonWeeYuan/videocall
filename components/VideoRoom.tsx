@@ -59,7 +59,7 @@ const VideoRoom: NextPage<Props> = ({username}) => {
   const userVideo = useRef<HTMLVideoElement>(null);
   const router = useRouter();
   const [peers, setPeers] = useState<PeerObject[]>([]);
-  const peerInstance = useRef<object>();
+  const peerInstance = useRef<any>();
   const remotePeerInstance = useRef(null);
   
   useEffect(() => {
@@ -71,14 +71,14 @@ const VideoRoom: NextPage<Props> = ({username}) => {
       channel.bind("pusher:subscription_succeeded", (members: PusherTypes.Members) => {
         console.log("Subscribed to channel")
         setOnlineUsersCount(members.count);
-        members.each((member) => {
+        members.each((member: any) => {
           setOnlineUsers((prevState) => [...prevState, member.info.username]);
         });
         setUserId(members.me.id);
       });
       
       //When new member joins the chat
-      channel.bind("pusher:member_added", async (member) => {
+      channel.bind("pusher:member_added", async (member: any) => {
         setOnlineUsersCount(channel.members.count);
         setOnlineUsers((prevState) => [...prevState, member.info.username]);
         
@@ -90,10 +90,10 @@ const VideoRoom: NextPage<Props> = ({username}) => {
       });
       
       //When member leaves the chat
-      channel.bind("pusher:member_removed", (member) => {
+      channel.bind("pusher:member_removed", (member: any) => {
         console.log("User has left the Chat");
         setOnlineUsers([]);
-        channel.members.each((member) => {
+        channel.members.each((member: any) => {
           setOnlineUsers((prevState) => [...prevState, member.info.username]);
         });
       });
