@@ -43,8 +43,8 @@ const Video: NextPage<VideoProps> = ({stream}) => {
       ref={ref}
       autoPlay={true}
       controls={false}
-      height="300px"
-      width="400px"
+      height="100%"
+      width="100%"
     ></video>
   );
 };
@@ -91,9 +91,18 @@ const VideoRoom: NextPage<Props> = ({username}) => {
         })
         setOnlineUsersCount(members.count);
         members.each((member: any) => {
-          setOnlineUsers((prevState) => [...prevState, member.info.username]);
+          if (member.id != members.me.id) {
+            setOnlineUsers((prevState) => [...prevState, member.info.username]);
+            setPeers((prevState) => [
+              ...prevState,
+              {peerId: member.id, username: member.info.username},
+            ]);
+          }
+          
         });
+        console.log(peers)
         setUserId(members.me.id);
+        console.log("My id is " + userId)
       });
       
       //When new member joins the chat
@@ -113,6 +122,7 @@ const VideoRoom: NextPage<Props> = ({username}) => {
           {peerId: member.id, username: member.info.username},
         ]);
         console.log("New User Entered the Chat");
+        console.log(peers);
       });
       
       //When member leaves the chat
@@ -150,6 +160,7 @@ const VideoRoom: NextPage<Props> = ({username}) => {
             // remotePeerInstance.current.srcObject = remoteStream;
             setPeerMedia(prevState => ({...prevState, [call.peer]: remoteStream}))
           });
+          
         });
         
         peer.on("error", (err) => {
@@ -229,8 +240,8 @@ const VideoRoom: NextPage<Props> = ({username}) => {
   const [isOpen, setIsOpen] = useState<boolean>(true);
   const callEveryone = () => {
     peers.forEach((peer) => {
-        //       console.log(peer.peerId)
-        //       callPeer(peer.peerId);
+        console.log(peer.peerId)
+        callPeer(peer.peerId);
       }
     );
     setIsOpen(false);
@@ -252,12 +263,20 @@ const VideoRoom: NextPage<Props> = ({username}) => {
       </ModalFooter>
     </ModalContent>
   </Modal><SimpleGrid columns={{sm: 2, md: 3}} spacing='10px' p={50}>
-    <Box bg='white' height='200px'></Box>
-    <Box bg='white' height='200px'></Box>
-    <Box bg='white' height='200px'></Box>
-    <Box bg='white' height='200px'></Box>
-    <Box bg='white' height='200px'></Box>
-    <Box bg='white' height='200px'></Box>
+    <Box bg='white' height='100%'>
+      <video ref={userVideo}
+             autoPlay={true}
+             height="100%"
+             width="100%"
+             muted={true}></video>
+    </Box>
+    {Object.values(peerMedia).map((stream, index) => {
+      return (
+        <Box bg="white" key={index} height='100%'>
+          <Video stream={stream}/>
+        </Box>
+      );
+    })}
   </SimpleGrid>
   
   </Box>)
