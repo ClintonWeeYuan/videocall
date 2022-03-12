@@ -66,7 +66,7 @@ const VideoRoom: NextPage<Props> = ({username}) => {
   useEffect(() => {
     let mounted = true;
     if (mounted) {
-      const channel: PusherTypes.PresenceChannel = pusher.subscribe("presence-channel");
+      const channel: any = pusher.subscribe("presence-channel");
       //When user subscribes to channel
       
       channel.bind("pusher:subscription_succeeded", (members: PusherTypes.Members) => {
