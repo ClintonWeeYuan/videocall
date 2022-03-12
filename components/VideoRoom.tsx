@@ -45,6 +45,7 @@ const Video: NextPage<VideoProps> = ({stream}) => {
       controls={false}
       height="100%"
       width="100%"
+      playsInline
     ></video>
   );
 };
@@ -262,13 +263,13 @@ const VideoRoom: NextPage<Props> = ({username}) => {
         </Button>
       </ModalFooter>
     </ModalContent>
-  </Modal><SimpleGrid columns={{sm: 2, md: 3}} spacing='10px' p={50}>
+  </Modal><SimpleGrid columns={{base: 2, md: 3}} spacing='10px' p={50}>
     <Box bg='white' height='100%'>
       <video ref={userVideo}
              autoPlay={true}
              height="100%"
              width="100%"
-             muted={true}></video>
+             muted={true} playsInline></video>
     </Box>
     {Object.values(peerMedia).map((stream, index) => {
       return (
