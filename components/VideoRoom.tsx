@@ -7,7 +7,7 @@ import {
   ModalFooter,
   ModalBody,
   ModalCloseButton,
-} from '@chakra-ui/react'
+} from '@chakra-ui/react';
 import Pusher from "pusher-js";
 import {useEffect, useRef, useState} from 'react'
 import {useRouter} from 'next/router'
@@ -78,7 +78,7 @@ const VideoRoom: NextPage<Props> = ({username}) => {
   useEffect(() => {
     let mounted = true;
     if (mounted) {
-      const channel: any = pusher.subscribe("presence-channel");
+      const channel: any = pusher.subscribe("presence-channel-" + router.query);
       //When user subscribes to channel
       
       channel.bind("pusher:subscription_succeeded", (members: PusherTypes.Members) => {
@@ -208,8 +208,6 @@ const VideoRoom: NextPage<Props> = ({username}) => {
   //Get Media Stream Function
   async function getMedia() {
     let stream = null;
-    // var getUserMedia =
-    //   navigator.mediaDevices.getUserMedia ||
     //   navigator.mediaDevices.webkitGetUserMedia ||
     //   navigator.mediaDevices.mozGetUserMedia;
     try {
