@@ -1,5 +1,5 @@
 import {NextPage} from "next";
-import {Box, Text, Button} from '@chakra-ui/react'
+import {Box, Text, Button, useToast, Grid, GridItem, SimpleGrid} from '@chakra-ui/react'
 import Pusher from "pusher-js";
 import {useEffect, useRef, useState} from 'react'
 import {useRouter} from 'next/router'
@@ -63,6 +63,9 @@ const VideoRoom: NextPage<Props> = ({username}) => {
   const peerInstance = useRef<any>();
   const remotePeerInstance = useRef(null);
   
+  //Toast Message upon joining
+  const toast = useToast()
+  
   useEffect(() => {
     let mounted = true;
     if (mounted) {
@@ -71,6 +74,13 @@ const VideoRoom: NextPage<Props> = ({username}) => {
       
       channel.bind("pusher:subscription_succeeded", (members: PusherTypes.Members) => {
         console.log("Subscribed to channel")
+        toast({
+          title: 'Entered Room',
+          description: "You have successfully entered the room!",
+          status: 'success',
+          duration: 4000,
+          isClosable: true,
+        })
         setOnlineUsersCount(members.count);
         members.each((member: any) => {
           setOnlineUsers((prevState) => [...prevState, member.info.username]);
@@ -80,6 +90,13 @@ const VideoRoom: NextPage<Props> = ({username}) => {
       
       //When new member joins the chat
       channel.bind("pusher:member_added", async (member: any) => {
+        toast({
+          title: 'New Member',
+          description: `${member.info.username} has entered the room!`,
+          status: 'success',
+          duration: 4000,
+          isClosable: true,
+        })
         setOnlineUsersCount(channel.members.count);
         setOnlineUsers((prevState) => [...prevState, member.info.username]);
         
@@ -199,39 +216,43 @@ const VideoRoom: NextPage<Props> = ({username}) => {
     startMedia();
   }, []);
   
-  return (<Box><Text>Hello {username}</Text>
-    <Box>
-      <video ref={userVideo}
-             autoPlay={true}
-             height="250px"
-             width="300px"
-             muted={true}></video>
-    </Box>
-    
-    {onlineUsers.map((user, id) => {
-      return (<Box key={id}>{user}</Box>)
-    })}
-    {Object.values(peerMedia).map((stream, index) => {
-      return (
-        <div key={index} style={{border: "1px solid red"}}>
-          <Video stream={stream}/>
-        </div>
-      );
-    })}
-    
-    
-    <Button
-      onClick={() =>
-        peers.forEach((peer) => {
-          console.log(peer.peerId)
-          callPeer(peer.peerId);
-          
-          
-        })
-      }
-    >
-      Call Everyone
-    </Button></Box>)
+  return (<SimpleGrid columns={{sm: 2, md: 3}} spacing='10px' p={50}>
+    <Box bg='white' height='200px'></Box>
+    <Box bg='white' height='200px'></Box>
+    <Box bg='white' height='200px'></Box>
+    <Box bg='white' height='200px'></Box>
+    <Box bg='white' height='200px'></Box>
+  </SimpleGrid>)
+  // <Box>
+  //   <video ref={userVideo}
+  //          autoPlay={true}
+  //          height="250px"
+  //          width="300px"
+  //          muted={true}></video>
+  // </Box>
+  //
+  // {onlineUsers.map((user, id) => {
+  //   return (<Box key={id}>{user}</Box>)
+  // })}
+  // {Object.values(peerMedia).map((stream, index) => {
+  //   return (
+  //     <div key={index}>
+  //       <Video stream={stream}/>
+  //     </div>
+  //   );
+  // })}
+  //
+  //
+  // <Button
+  //   onClick={() =>
+  //     peers.forEach((peer) => {
+  //       console.log(peer.peerId)
+  //       callPeer(peer.peerId);
+  //     })
+  //   }
+  // >
+  //   Call Everyone
+  // </Button>)
 }
 
 export default VideoRoom
