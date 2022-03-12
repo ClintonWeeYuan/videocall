@@ -45,6 +45,7 @@ const Video: NextPage<VideoProps> = ({stream}) => {
       controls={false}
       height="100%"
       width="100%"
+      playsInline
     ></video>
   );
 };
@@ -268,7 +269,7 @@ const VideoRoom: NextPage<Props> = ({username}) => {
              autoPlay={true}
              height="100%"
              width="100%"
-             muted={true}></video>
+             muted={true} playsInline></video>
     </Box>
     {Object.values(peerMedia).map((stream, index) => {
       return (
