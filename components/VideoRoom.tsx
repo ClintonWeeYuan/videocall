@@ -78,7 +78,8 @@ const VideoRoom: NextPage<Props> = ({username}) => {
   useEffect(() => {
     let mounted = true;
     if (mounted) {
-      const channel: any = pusher.subscribe("presence-channel-" + router.query);
+      console.log(`presence-${router.query.room}`)
+      const channel: any = pusher.subscribe(`presence-${router.query.room}`);
       //When user subscribes to channel
       
       channel.bind("pusher:subscription_succeeded", (members: PusherTypes.Members) => {
@@ -123,7 +124,6 @@ const VideoRoom: NextPage<Props> = ({username}) => {
           {peerId: member.id, username: member.info.username},
         ]);
         console.log("New User Entered the Chat");
-        console.log(peers);
       });
       
       //When member leaves the chat
@@ -138,7 +138,7 @@ const VideoRoom: NextPage<Props> = ({username}) => {
     
     
     return () => {
-      pusher.unsubscribe("presence-channel");
+      pusher.unsubscribe(`presence-${router.query.room}`);
       mounted = false;
     };
   }, []);
