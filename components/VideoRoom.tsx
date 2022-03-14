@@ -51,11 +51,7 @@ const Video: NextPage<VideoProps> = ({stream}) => {
 };
 
 const VideoRoom: NextPage<Props> = ({username}) => {
-  const pusher = new Pusher(process.env.NEXT_PUBLIC_KEY ? process.env.NEXT_PUBLIC_KEY : '', {
-    cluster: "ap1",
-    authEndpoint: "api/pusher/auth",
-    auth: {params: {username}},
-  });
+  
   
   //Online Users State
   const [onlineUsersCount, setOnlineUsersCount] = useState(0);
@@ -76,70 +72,72 @@ const VideoRoom: NextPage<Props> = ({username}) => {
   const toast = useToast()
   
   useEffect(() => {
-    let mounted = true;
-    if (mounted) {
-      console.log(`presence-${router.query.room}`)
-      const channel: any = pusher.subscribe(`presence-${router.query.room}`);
-      //When user subscribes to channel
-      
-      channel.bind("pusher:subscription_succeeded", (members: PusherTypes.Members) => {
-        console.log("Subscribed to channel")
-        toast({
-          title: 'Entered Room',
-          description: "You have successfully entered the room!",
-          status: 'success',
-          duration: 4000,
-          isClosable: true,
-        })
-        setOnlineUsersCount(members.count);
-        members.each((member: any) => {
-          if (member.id != members.me.id) {
-            setOnlineUsers((prevState) => [...prevState, member.info.username]);
-            setPeers((prevState) => [
-              ...prevState,
-              {peerId: member.id, username: member.info.username},
-            ]);
-          }
-          
-        });
-        console.log(peers)
-        setUserId(members.me.id);
-        console.log("My id is " + userId)
-      });
-      
-      //When new member joins the chat
-      channel.bind("pusher:member_added", async (member: any) => {
-        toast({
-          title: 'New Member',
-          description: `${member.info.username} has entered the room!`,
-          status: 'success',
-          duration: 4000,
-          isClosable: true,
-        })
-        setOnlineUsersCount(channel.members.count);
-        setOnlineUsers((prevState) => [...prevState, member.info.username]);
-        
-        setPeers((prevState) => [
-          ...prevState,
-          {peerId: member.id, username: member.info.username},
-        ]);
-        console.log("New User Entered the Chat");
-      });
-      
-      //When member leaves the chat
-      channel.bind("pusher:member_removed", (member: any) => {
-        console.log("User has left the Chat");
-        setOnlineUsers([]);
-        channel.members.each((member: any) => {
+    const pusher = new Pusher(process.env.NEXT_PUBLIC_KEY ? process.env.NEXT_PUBLIC_KEY : '', {
+      cluster: "ap1",
+      authEndpoint: "api/pusher/auth",
+      auth: {params: {username}},
+    });
+    console.log(`presence-${router.query.room}`)
+    const channel: any = pusher.subscribe(`presence-${router.query.room}`);
+    //When user subscribes to channel
+    
+    channel.bind("pusher:subscription_succeeded", (members: PusherTypes.Members) => {
+      console.log("Subscribed to channel")
+      toast({
+        title: 'Entered Room',
+        description: "You have successfully entered the room!",
+        status: 'success',
+        duration: 4000,
+        isClosable: true,
+      })
+      setOnlineUsersCount(members.count);
+      members.each((member: any) => {
+        if (member.id != members.me.id) {
           setOnlineUsers((prevState) => [...prevState, member.info.username]);
-        });
+          setPeers((prevState) => [
+            ...prevState,
+            {peerId: member.id, username: member.info.username},
+          ]);
+        }
+        
       });
-    }
+      console.log(peers)
+      setUserId(members.me.id);
+      
+    });
+    
+    //When new member joins the chat
+    channel.bind("pusher:member_added", async (member: any) => {
+      toast({
+        title: 'New Member',
+        description: `${member.info.username} has entered the room!`,
+        status: 'success',
+        duration: 4000,
+        isClosable: true,
+      })
+      setOnlineUsersCount(channel.members.count);
+      setOnlineUsers((prevState) => [...prevState, member.info.username]);
+      
+      setPeers((prevState) => [
+        ...prevState,
+        {peerId: member.id, username: member.info.username},
+      ]);
+      console.log("New User Entered the Chat");
+    });
+    
+    //When member leaves the chat
+    channel.bind("pusher:member_removed", (member: any) => {
+      console.log("User has left the Chat");
+      setOnlineUsers([]);
+      channel.members.each((member: any) => {
+        setOnlineUsers((prevState) => [...prevState, member.info.username]);
+      });
+    });
     
     
     return () => {
       pusher.unsubscribe(`presence-${router.query.room}`);
-      mounted = false;
+      
     };
   }, []);
   
@@ -239,7 +237,7 @@ const VideoRoom: NextPage<Props> = ({username}) => {
   const [isOpen, setIsOpen] = useState<boolean>(true);
   const callEveryone = () => {
     peers.forEach((peer) => {
-        console.log(peer.peerId)
+        console.log("Calling" + peer.username)
         callPeer(peer.peerId);
       }
     );
