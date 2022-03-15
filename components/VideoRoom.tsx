@@ -318,7 +318,7 @@ const VideoRoom: NextPage<Props> = ({username}) => {
           );
         })}
       </SimpleGrid></GridItem>
-      <GridItem display={{base: 'none', md: 'block'}} sx={{border: "1px solid red"}} rowSpan={3}
+      <GridItem display={{base: 'none', md: 'block'}} rowSpan={3}
                 colSpan={2}><Box p={3}><Heading size="medium">Chat Box</Heading>
         <Flex direction="column" justify="space-between" align="space-between" h="70vh">
           <Box sx={{height: "50vh", overflowY: "scroll"}}
