@@ -6,7 +6,7 @@ import {
   ModalHeader,
   ModalFooter,
   ModalBody,
-  ModalCloseButton, Flex, Heading, List, ListItem, ListIcon,
+  ModalCloseButton, Flex, Heading, List, ListItem, ListIcon, Input
 } from '@chakra-ui/react';
 import Pusher from "pusher-js";
 import {useEffect, useRef, useState} from 'react'
@@ -14,6 +14,7 @@ import {useRouter} from 'next/router'
 import Peer from "peerjs";
 import * as PusherTypes from 'pusher-js';
 import {CheckCircleIcon} from "@chakra-ui/icons";
+import axios from "axios";
 
 
 type Props = {
@@ -29,6 +30,11 @@ interface PeerMediaStreams {
 
 interface PeerObject {
   peerId: string;
+  username: string;
+}
+
+interface ChatObject {
+  message: string;
   username: string;
 }
 
@@ -68,6 +74,10 @@ const VideoRoom: NextPage<Props> = ({username}) => {
   const [peers, setPeers] = useState<PeerObject[]>([]);
   const peerInstance = useRef<any>();
   const remotePeerInstance = useRef(null);
+  
+  //Chat Messages
+  const [chats, setChats] = useState<ChatObject[]>([]);
+  const [message, setMessage] = useState<string>("");
   
   //Toast Message upon joining
   const toast = useToast()
@@ -135,6 +145,13 @@ const VideoRoom: NextPage<Props> = ({username}) => {
       });
     });
     
+    //When receive new message
+    channel.bind("chat-update", (data: ChatObject) => {
+      const {message, username} = data;
+      setChats((prevState) => [...prevState, {username, message}]);
+      console.log("Message Received");
+      console.log(chats);
+    });
     
     return () => {
       pusher.unsubscribe(`presence-${router.query.room}`);
@@ -233,6 +250,12 @@ const VideoRoom: NextPage<Props> = ({username}) => {
     startMedia();
   }, []);
   
+  //Submits Chat Message
+  // const handleSubmit = async (e: KeyboardEvent<HTMLInputElement>) => {
+  //   e.preventDefault();
+  //   await axios.post("/api/pusher", {message, username, channel: `presence-${router.query.room}`});
+  // };
+  
   //Modal Control
   
   const [isOpen, setIsOpen] = useState<boolean>(true);
@@ -244,6 +267,7 @@ const VideoRoom: NextPage<Props> = ({username}) => {
     );
     setIsOpen(false);
   }
+  
   
   return (<Box> <Modal isOpen={isOpen} onClose={() => setIsOpen(false)}>
     <ModalOverlay/>
@@ -263,7 +287,7 @@ const VideoRoom: NextPage<Props> = ({username}) => {
   </Modal>
     <Grid h='90vh'
           templateRows='repeat(3, 1fr)'
-          templateColumns={{base: 'repeat(5, 1fr)', md: 'repeat(7, 1fr)'}}
+          templateColumns={{base: 'repeat(6, 1fr)', md: 'repeat(8, 1fr)'}}
           gap={4}>
       <GridItem display={{base: 'none', md: 'block'}} rowSpan={3} colSpan={1}><Flex direction="column" justify="center"
                                                                                     align="center"><Heading
@@ -294,7 +318,32 @@ const VideoRoom: NextPage<Props> = ({username}) => {
           );
         })}
       </SimpleGrid></GridItem>
-      <GridItem display={{base: 'none', md: 'block'}} rowSpan={3} colSpan={1}/>
+      <GridItem display={{base: 'none', md: 'block'}} sx={{border: "1px solid red"}} rowSpan={3}
+                colSpan={2}><Box p={3}><Heading size="medium">Chat Box</Heading>
+        <Flex direction="column" justify="space-between" align="space-between" h="70vh">
+          <Box sx={{height: "50vh", overflowY: "scroll"}}
+          >
+            {chats.map((chat, id) => {
+              return <Text key={id}>{chat.username}: {chat.message}</Text>;
+            })}
+          </Box>
+          <Box sx={{height: "20vh", display: "flex", alignItems: "flex-end"}}>
+            <Input variant="flushed"
+                   placeholder="Type your message here..."
+                   value={message}
+                   onChange={(e) => setMessage(e.target.value)} onKeyPress={(e) => {
+              if (e.charCode === 13) {
+                axios.post("/api/pusher", {message, username, channel: `presence-${router.query.room}`});
+                setMessage('')
+              }
+              ;
+              
+            }}
+            ></Input>
+          </Box>
+        </Flex>
+      </Box>
+      </GridItem>
     </Grid>
   
   
