@@ -1,14 +1,17 @@
 import {NextApiRequest, NextApiResponse} from "next";
-import randomWords from "random-words";
+import {pusher} from "../../../lib/index";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   
   
-  const randomString = randomWords({exactly: 3, join: "-"});
-  
-  
   try {
-    console.log("Hello")
+    const {message, username, channel} = req.body;
+    console.log("Message Sent");
+    await pusher.trigger(channel, "chat-update", {
+      message,
+      username,
+    });
+    res.json({status: 200});
   }
   catch (error) {
     console.error(error);
