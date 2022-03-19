@@ -15,6 +15,7 @@ import Peer from "peerjs";
 import * as PusherTypes from 'pusher-js';
 import {CheckCircleIcon} from "@chakra-ui/icons";
 import axios from "axios";
+import styles from "../styles/chat.module.css";
 
 
 type Props = {
@@ -268,6 +269,16 @@ const VideoRoom: NextPage<Props> = ({username}) => {
     setIsOpen(false);
   }
   
+  //Scroll to Bottom of ChatBox
+  const messagesEndRef = useRef(null);
+  
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({behavior: "smooth"})
+  }
+  
+  useEffect(() => {
+    scrollToBottom()
+  }, [chats]);
   
   return (<Box> <Modal isOpen={isOpen} onClose={() => setIsOpen(false)}>
     <ModalOverlay/>
@@ -321,11 +332,12 @@ const VideoRoom: NextPage<Props> = ({username}) => {
       <GridItem display={{base: 'none', md: 'block'}} rowSpan={3}
                 colSpan={2}><Box p={3}><Heading size="medium">Chat Box</Heading>
         <Flex direction="column" justify="space-between" align="space-between" h="70vh">
-          <Box sx={{height: "50vh", overflowY: "scroll"}}
+          <Box className={styles.chat} sx={{height: "50vh", overflowY: "scroll"}}
           >
             {chats.map((chat, id) => {
               return <Text key={id}>{chat.username}: {chat.message}</Text>;
             })}
+            <div ref={messagesEndRef}/>
           </Box>
           <Box sx={{height: "20vh", display: "flex", alignItems: "flex-end"}}>
             <Input variant="flushed"

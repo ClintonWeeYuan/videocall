@@ -1,0 +1,14 @@
+.chat::-webkit-scrollbar {
+    display: none;
+}
+
+.chat ::-moz-scrollbar {
+    display: none;
+
+}
+
+.chat {
+    overflow: auto;
+    -ms-overflow-style: none;
+    scrollbar-color: transparent transparent; /*just hides the scrollbar for firefox */
+}
