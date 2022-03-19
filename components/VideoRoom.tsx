@@ -335,7 +335,7 @@ const VideoRoom: NextPage<Props> = ({username}) => {
           <Box className={styles.chat} sx={{height: "50vh", overflowY: "scroll"}}
           >
             {chats.map((chat, id) => {
-              return <Text key={id}>{chat.username}: {chat.message}</Text>;
+              return <Text key={id}>{chat.username == username ? 'Me' : chat.username}: {chat.message}</Text>;
             })}
             <div ref={messagesEndRef}/>
           </Box>
