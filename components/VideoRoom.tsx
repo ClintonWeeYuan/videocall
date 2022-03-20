@@ -258,14 +258,6 @@ const VideoRoom: NextPage<Props> = ({username}) => {
     startMedia();
   }, []);
   
-  //Submits Chat Message
-  // const handleSubmit = async (e: KeyboardEvent<HTMLInputElement>) => {
-  //   e.preventDefault();
-  //   await axios.post("/api/pusher", {message, username, channel: `presence-${router.query.room}`});
-  // };
-  
-  //Modal Control
-  
   const [isOpen, setIsOpen] = useState<boolean>(true);
   const callEveryone = () => {
     peers.forEach((peer) => {
@@ -286,6 +278,23 @@ const VideoRoom: NextPage<Props> = ({username}) => {
   useEffect(() => {
     scrollToBottom()
   }, [chats]);
+  
+  //Calculate grid columns
+  const [numColumns, setNumColumns] = useState<number>(1)
+  const [mobileNumColumns, setMobileNumColumns] = useState<number>(1)
+  
+  useEffect(() => {
+    if (onlineUsers.length == 0) {
+      setNumColumns(1);
+      setMobileNumColumns(1);
+    } else if (onlineUsers.length == 1) {
+      setNumColumns(2);
+      setMobileNumColumns(2);
+    } else {
+      setNumColumns(3);
+      setMobileNumColumns(2);
+    }
+  }, [onlineUsers])
   
   return <Box> <Modal isOpen={isOpen} onClose={() => setIsOpen(false)}>
     <ModalOverlay/>
@@ -319,13 +328,14 @@ const VideoRoom: NextPage<Props> = ({username}) => {
         {/* You can also use custom icons from react-icons */}
       
       </List></Flex></GridItem>
-      <GridItem rowSpan={3} colSpan={5}> <SimpleGrid columns={{base: 2, md: 3}} spacing='10px' p={50}>
+      <GridItem rowSpan={3} colSpan={5}> <SimpleGrid columns={{base: mobileNumColumns, md: numColumns}} spacing='10px'
+                                                     p={50}>
         <Box bg='white' height='100%'>
           <video ref={userVideo}
                  autoPlay={true}
                  height="100%"
                  width="100%"
-                 muted={true} playsInline></video>
+                 muted={true} playsInline/>
         </Box>
         {Object.values(peerMedia).map((stream, index) => {
           return <Box bg="white" key={index} height='100%'>
