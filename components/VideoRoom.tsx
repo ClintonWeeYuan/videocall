@@ -287,7 +287,7 @@ const VideoRoom: NextPage<Props> = ({username}) => {
     scrollToBottom()
   }, [chats]);
   
-  return (<Box> <Modal isOpen={isOpen} onClose={() => setIsOpen(false)}>
+  return <Box> <Modal isOpen={isOpen} onClose={() => setIsOpen(false)}>
     <ModalOverlay/>
     <ModalContent>
       <ModalHeader>Modal Title</ModalHeader>
@@ -312,10 +312,9 @@ const VideoRoom: NextPage<Props> = ({username}) => {
         size="medium"
         p={5}>Online
         Users</Heading><List spacing={3} p={3}>
-        {onlineUsers.map((onlineUser, index) => (
-          <ListItem key={index}> <ListIcon as={CheckCircleIcon} color='green.500'/>
-            {onlineUser}</ListItem>
-        ))}
+        {onlineUsers.map((onlineUser, index) => <ListItem key={index}> <ListIcon as={CheckCircleIcon}
+                                                                                 color='green.500'/>
+          {onlineUser}</ListItem>)}
         
         {/* You can also use custom icons from react-icons */}
       
@@ -329,44 +328,46 @@ const VideoRoom: NextPage<Props> = ({username}) => {
                  muted={true} playsInline></video>
         </Box>
         {Object.values(peerMedia).map((stream, index) => {
-          return (
-            <Box bg="white" key={index} height='100%'>
-              <Video stream={stream}/>
-            </Box>
-          );
+          return <Box bg="white" key={index} height='100%'>
+            <Video stream={stream}/>
+          </Box>;
         })}
       </SimpleGrid></GridItem>
       <GridItem display={{base: 'none', md: 'block'}} rowSpan={3}
-                colSpan={2}><Box p={3}><Heading size="medium">Chat Box</Heading>
-        <Flex direction="column" justify="space-between" align="space-between" h="70vh">
-          <Box className={styles.chat} sx={{height: "50vh", overflowY: "scroll"}}
-          >
-            {chats.map((chat, id) => {
-              return <Message key={id} username={username} sender={chat.username} message={chat.message}/>
-            })}
-            <div ref={messagesEndRef}/>
-          </Box>
-          <Box sx={{height: "20vh", display: "flex", alignItems: "flex-end"}}>
-            <Input variant="flushed"
-                   placeholder="Type your message here..."
-                   value={message}
-                   onChange={(e) => setMessage(e.target.value)} onKeyPress={(e) => {
-              if (e.charCode === 13) {
-                axios.post("/api/pusher", {message, username, channel: `presence-${router.query.room}`});
-                setMessage('')
-              }
-              ;
-              
-            }}
-            ></Input>
-          </Box>
-        </Flex>
-      </Box>
+                colSpan={2}>
+        <Box p={3}>
+          <Heading sx={{textAlign: "center"}}
+                   size="medium">Chat
+            Box</Heading>
+          <Flex direction="column" justify="center" align="space-between">
+            <Box className={styles.chat} sx={{height: "50vh", overflowY: "scroll"}}
+            >
+              {chats.map((chat, id) => {
+                return <Message key={id} username={username} sender={chat.username} message={chat.message}/>
+              })}
+              <div ref={messagesEndRef}/>
+            </Box>
+            <Box sx={{height: "20vh", display: "flex"}}>
+              <Input variant="flushed"
+                     placeholder="Type your message here..."
+                     value={message}
+                     onChange={(e) => setMessage(e.target.value)} onKeyPress={(e) => {
+                if (e.charCode === 13) {
+                  axios.post("/api/pusher", {message, username, channel: `presence-${router.query.room}`});
+                  setMessage('')
+                }
+                ;
+                
+              }}
+              ></Input>
+            </Box>
+          </Flex>
+        </Box>
       </GridItem>
     </Grid>
   
   
-  </Box>)
+  </Box>
 }
 
 export default VideoRoom
