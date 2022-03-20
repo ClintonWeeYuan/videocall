@@ -16,6 +16,7 @@ import * as PusherTypes from 'pusher-js';
 import {CheckCircleIcon} from "@chakra-ui/icons";
 import axios from "axios";
 import styles from "../styles/chat.module.css";
+import Message from '../components/Message'
 
 
 type Props = {
@@ -144,8 +145,14 @@ const VideoRoom: NextPage<Props> = ({username}) => {
       channel.members.each((member: any) => {
         setOnlineUsers((prevState) => [...prevState, member.info.username]);
       });
+      setPeers(peers.filter((e) => {
+          return e.peerId != member.id;
+        })
+      );
+      
+      setPeerMedia(prevState => ({...prevState, [member.id]: null}));
+      
     });
-    
     //When receive new message
     channel.bind("chat-update", (data: ChatObject) => {
       const {message, username} = data;
@@ -335,7 +342,7 @@ const VideoRoom: NextPage<Props> = ({username}) => {
           <Box className={styles.chat} sx={{height: "50vh", overflowY: "scroll"}}
           >
             {chats.map((chat, id) => {
-              return <Text key={id}>{chat.username == username ? 'Me' : chat.username}: {chat.message}</Text>;
+              return <Message username={username} sender={chat.username} message={chat.message}/>
             })}
             <div ref={messagesEndRef}/>
           </Box>
