@@ -171,7 +171,11 @@ const VideoRoom: NextPage<Props> = ({username}) => {
   useEffect(() => {
     async function createPeer() {
       if (userId) {
-        const peer = new Peer(userId);
+        const peer = new Peer(userId, {
+          host: 'localhost',
+          port: 9000,
+          path: '/peerjs/myapp'
+        });
         peerInstance.current = peer;
         peer.on("open", (id) => {
           console.log("My peer id is " + id);
