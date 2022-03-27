@@ -15,6 +15,8 @@ import Peer from "peerjs";
 import * as PusherTypes from 'pusher-js';
 import {CheckCircleIcon} from "@chakra-ui/icons";
 import axios from "axios";
+import styles from "../styles/chat.module.css";
+import Message from '../components/Message'
 
 
 type Props = {
@@ -143,8 +145,14 @@ const VideoRoom: NextPage<Props> = ({username}) => {
       channel.members.each((member: any) => {
         setOnlineUsers((prevState) => [...prevState, member.info.username]);
       });
+      setPeers(peers.filter((e) => {
+          return e.peerId != member.id;
+        })
+      );
+      
+      setPeerMedia(prevState => ({...prevState, [member.id]: null}));
+      
     });
-    
     //When receive new message
     channel.bind("chat-update", (data: ChatObject) => {
       const {message, username} = data;
@@ -250,14 +258,6 @@ const VideoRoom: NextPage<Props> = ({username}) => {
     startMedia();
   }, []);
   
-  //Submits Chat Message
-  // const handleSubmit = async (e: KeyboardEvent<HTMLInputElement>) => {
-  //   e.preventDefault();
-  //   await axios.post("/api/pusher", {message, username, channel: `presence-${router.query.room}`});
-  // };
-  
-  //Modal Control
-  
   const [isOpen, setIsOpen] = useState<boolean>(true);
   const callEveryone = () => {
     peers.forEach((peer) => {
@@ -268,8 +268,35 @@ const VideoRoom: NextPage<Props> = ({username}) => {
     setIsOpen(false);
   }
   
+  //Scroll to Bottom of ChatBox
+  const messagesEndRef = useRef<null | HTMLDivElement>(null);
   
-  return (<Box> <Modal isOpen={isOpen} onClose={() => setIsOpen(false)}>
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({behavior: "smooth"})
+  }
+  
+  useEffect(() => {
+    scrollToBottom()
+  }, [chats]);
+  
+  //Calculate grid columns
+  const [numColumns, setNumColumns] = useState<number>(1)
+  const [mobileNumColumns, setMobileNumColumns] = useState<number>(1)
+  
+  useEffect(() => {
+    if (onlineUsers.length == 0) {
+      setNumColumns(1);
+      setMobileNumColumns(1);
+    } else if (onlineUsers.length == 1) {
+      setNumColumns(2);
+      setMobileNumColumns(2);
+    } else {
+      setNumColumns(3);
+      setMobileNumColumns(2);
+    }
+  }, [onlineUsers])
+  
+  return <Box> <Modal isOpen={isOpen} onClose={() => setIsOpen(false)}>
     <ModalOverlay/>
     <ModalContent>
       <ModalHeader>Modal Title</ModalHeader>
@@ -294,60 +321,63 @@ const VideoRoom: NextPage<Props> = ({username}) => {
         size="medium"
         p={5}>Online
         Users</Heading><List spacing={3} p={3}>
-        {onlineUsers.map((onlineUser, index) => (
-          <ListItem key={index}> <ListIcon as={CheckCircleIcon} color='green.500'/>
-            {onlineUser}</ListItem>
-        ))}
+        {onlineUsers.map((onlineUser, index) => <ListItem key={index}> <ListIcon as={CheckCircleIcon}
+                                                                                 color='green.500'/>
+          {onlineUser}</ListItem>)}
         
         {/* You can also use custom icons from react-icons */}
       
       </List></Flex></GridItem>
-      <GridItem rowSpan={3} colSpan={5}> <SimpleGrid columns={{base: 2, md: 3}} spacing='10px' p={50}>
+      <GridItem rowSpan={3} colSpan={5}> <SimpleGrid columns={{base: mobileNumColumns, md: numColumns}} spacing='10px'
+                                                     p={50}>
         <Box bg='white' height='100%'>
           <video ref={userVideo}
                  autoPlay={true}
                  height="100%"
                  width="100%"
-                 muted={true} playsInline></video>
+                 muted={true} playsInline/>
         </Box>
         {Object.values(peerMedia).map((stream, index) => {
-          return (
-            <Box bg="white" key={index} height='100%'>
-              <Video stream={stream}/>
-            </Box>
-          );
+          return <Box bg="white" key={index} height='100%'>
+            <Video stream={stream}/>
+          </Box>;
         })}
       </SimpleGrid></GridItem>
       <GridItem display={{base: 'none', md: 'block'}} rowSpan={3}
-                colSpan={2}><Box p={3}><Heading size="medium">Chat Box</Heading>
-        <Flex direction="column" justify="space-between" align="space-between" h="70vh">
-          <Box sx={{height: "50vh", overflowY: "scroll"}}
-          >
-            {chats.map((chat, id) => {
-              return <Text key={id}>{chat.username}: {chat.message}</Text>;
-            })}
-          </Box>
-          <Box sx={{height: "20vh", display: "flex", alignItems: "flex-end"}}>
-            <Input variant="flushed"
-                   placeholder="Type your message here..."
-                   value={message}
-                   onChange={(e) => setMessage(e.target.value)} onKeyPress={(e) => {
-              if (e.charCode === 13) {
-                axios.post("/api/pusher", {message, username, channel: `presence-${router.query.room}`});
-                setMessage('')
-              }
-              ;
-              
-            }}
-            ></Input>
-          </Box>
-        </Flex>
-      </Box>
+                colSpan={2}>
+        <Box p={3}>
+          <Heading sx={{textAlign: "center"}}
+                   size="medium">Chat
+            Box</Heading>
+          <Flex direction="column" justify="center" align="space-between">
+            <Box className={styles.chat} sx={{height: "50vh", overflowY: "scroll"}}
+            >
+              {chats.map((chat, id) => {
+                return <Message key={id} username={username} sender={chat.username} message={chat.message}/>
+              })}
+              <div ref={messagesEndRef}/>
+            </Box>
+            <Box sx={{height: "20vh", display: "flex"}}>
+              <Input variant="flushed"
+                     placeholder="Type your message here..."
+                     value={message}
+                     onChange={(e) => setMessage(e.target.value)} onKeyPress={(e) => {
+                if (e.charCode === 13) {
+                  axios.post("/api/pusher", {message, username, channel: `presence-${router.query.room}`});
+                  setMessage('')
+                }
+                ;
+                
+              }}
+              ></Input>
+            </Box>
+          </Flex>
+        </Box>
       </GridItem>
     </Grid>
   
   
-  </Box>)
+  </Box>
 }
 
 export default VideoRoom

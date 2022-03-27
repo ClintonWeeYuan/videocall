@@ -1,0 +1,28 @@
+.messageBox {
+
+}
+
+.messageBoxUser {
+    margin-left: auto;
+    text-align: left !important;
+}
+
+.messageText {
+
+    border-radius: 10px;
+    padding: 10px;
+    margin: 15px;
+    margin-right: auto;
+    width: 80%;
+    background-color: #e9e9eb !important;
+}
+
+.messageTextUser {
+    background-color: #0b81ff !important;
+    border-radius: 10px;
+    padding: 10px;
+    width: 80%;
+    margin: 15px;
+    margin-left: auto;
+    text-align: left !important;
+}
