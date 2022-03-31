@@ -172,9 +172,9 @@ const VideoRoom: NextPage<Props> = ({username}) => {
     async function createPeer() {
       if (userId) {
         const peer = new Peer(userId, {
-          host: 'localhost',
-          port: 9000,
-          path: '/peerjs/myapp'
+          host: 'peerjs-server-videocall.herokuapp.com',
+          port: 443,
+          secure: true,
         });
         peerInstance.current = peer;
         peer.on("open", (id) => {
