@@ -149,8 +149,13 @@ const VideoRoom: NextPage<Props> = ({username}) => {
           return e.peerId != member.id;
         })
       );
-      const {[member.id]: remove, ...rest} = peerMedia;
-      setPeerMedia(rest);
+      // const {[member.id]: remove, ...rest} = peerMedia;
+      // setPeerMedia(rest);
+      setPeerMedia((prevState) => {
+        const newData = {...prevState};
+        delete newData[member.id];
+        return newData;
+      })
       
     });
     //When receive new message
