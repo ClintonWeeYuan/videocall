@@ -149,8 +149,8 @@ const VideoRoom: NextPage<Props> = ({username}) => {
           return e.peerId != member.id;
         })
       );
-      
-      setPeerMedia(prevState => ({...prevState, [member.id]: null}));
+      const {[member.id]: remove, ...rest} = peerMedia;
+      setPeerMedia(rest);
       
     });
     //When receive new message
@@ -332,21 +332,21 @@ const VideoRoom: NextPage<Props> = ({username}) => {
         {/* You can also use custom icons from react-icons */}
       
       </List></Flex></GridItem>
-      <GridItem rowSpan={3} colSpan={5}> <SimpleGrid columns={{base: mobileNumColumns, md: numColumns}} spacing='10px'
-                                                     p={50}>
-        <Box bg='white' height='100%'>
-          <video ref={userVideo}
-                 autoPlay={true}
-                 height="100%"
-                 width="100%"
-                 muted={true} playsInline/>
-        </Box>
-        {Object.values(peerMedia).map((stream, index) => {
-          return <Box bg="white" key={index} height='100%'>
-            <Video stream={stream}/>
-          </Box>;
-        })}
-      </SimpleGrid></GridItem>
+      <GridItem rowSpan={3} colSpan={5}>
+        <SimpleGrid columns={{base: mobileNumColumns, md: numColumns}} spacing='10px' p={50}>
+          <Box bg='white' height='100%' maxH="400px" maxW="300px">
+            <video ref={userVideo}
+                   autoPlay={true}
+                   height="100%"
+                   width="100%"
+                   muted={true} playsInline/>
+          </Box>
+          {Object.values(peerMedia).map((stream, index) => {
+            return <Box bg="white" key={index} height='100%' maxH="400px" maxW="300px">
+              <Video stream={stream}/>
+            </Box>;
+          })}
+        </SimpleGrid></GridItem>
       <GridItem display={{base: 'none', md: 'block'}} rowSpan={3}
                 colSpan={2}>
         <Box p={3}>
