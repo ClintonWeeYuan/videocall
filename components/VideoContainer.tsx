@@ -2,10 +2,7 @@ import {NextPage} from "next";
 import {Box, SimpleGrid} from "@chakra-ui/react";
 import {useEffect, useRef, useState} from "react";
 import {getMedia} from '../lib/utils'
-
-interface PeerMediaStreams {
-    [id: string]: MediaStream;
-}
+import {PeerMediaStreams} from './VideoRoom'
 
 type Props = {
     onlineUsers: string[];

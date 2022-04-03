@@ -4,10 +4,7 @@ import styles from "../styles/chat.module.css";
 import Message from "./Message";
 import {useEffect, useRef} from "react";
 
-interface ChatObject {
-    message: string;
-    username: string;
-}
+import {ChatObject} from './VideoRoom'
 
 type Props = {
     chats: ChatObject[];

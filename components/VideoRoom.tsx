@@ -1,22 +1,18 @@
 import {NextPage} from "next";
 import {
-    Box, Text, Button, useToast, Grid, GridItem, SimpleGrid, Modal,
+    Box, Text, Button, useToast, Grid, GridItem, Modal,
     ModalOverlay,
     ModalContent,
     ModalHeader,
     ModalFooter,
     ModalBody,
-    ModalCloseButton, Flex, Heading, List, ListItem, ListIcon, Input
+    ModalCloseButton, Flex, Heading
 } from '@chakra-ui/react';
 import Pusher from "pusher-js";
 import {useEffect, useRef, useState} from 'react'
 import {useRouter} from 'next/router'
 import Peer from "peerjs";
 import * as PusherTypes from 'pusher-js';
-import {CheckCircleIcon} from "@chakra-ui/icons";
-import axios from "axios";
-import styles from "../styles/chat.module.css";
-import Message from '../components/Message'
 import OnlineStatus from './OnlineStatus'
 import ChatBox from './ChatBox'
 import ChatSender from './ChatSender'
@@ -27,48 +23,25 @@ import {getMedia} from '../lib/utils'
 type Props = {
     username: string;
 }
-type VideoProps = {
-    stream: MediaStream;
-}
 
-interface PeerMediaStreams {
+export interface PeerMediaStreams {
     [id: string]: MediaStream;
 }
 
-interface PeerObject {
+export interface PeerObject {
     peerId: string;
     username: string;
 }
 
-interface ChatObject {
+export interface ChatObject {
     message: string;
     username: string;
 }
-
-const Video: NextPage<VideoProps> = ({stream}) => {
-    const ref = useRef<HTMLVideoElement>(null);
-    useEffect(() => {
-        if (ref.current) {
-            ref.current.srcObject = stream;
-        }
-    }, [stream]);
-    return (
-        <video
-            ref={ref}
-            autoPlay={true}
-            controls={false}
-            height="100%"
-            width="100%"
-            playsInline
-        ></video>
-    );
-};
 
 const VideoRoom: NextPage<Props> = ({username}) => {
 
 
     //Online Users State
-    const [onlineUsersCount, setOnlineUsersCount] = useState(0);
     const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
 
     //Peer and Video States
@@ -77,17 +50,14 @@ const VideoRoom: NextPage<Props> = ({username}) => {
 
     // const [peerMedia, setPeerMedia] = useState<MediaStream[]>([]);
     const [peerMedia, setPeerMedia] = useState<PeerMediaStreams>({});
-    const userVideo = useRef<HTMLVideoElement>(null);
 
     // const [userVideo, setUserVideo] = useState<MediaStream>();
     const router = useRouter();
     const [peers, setPeers] = useState<PeerObject[]>([]);
     const peerInstance = useRef<any>();
-    const remotePeerInstance = useRef(null);
 
     //Chat Messages
     const [chats, setChats] = useState<ChatObject[]>([]);
-    const [message, setMessage] = useState<string>("");
 
     //Toast Message upon joining
     const toast = useToast()
@@ -111,7 +81,6 @@ const VideoRoom: NextPage<Props> = ({username}) => {
                 duration: 4000,
                 isClosable: true,
             })
-            setOnlineUsersCount(members.count);
             members.each((member: any) => {
                 if (member.id != members.me.id) {
                     setOnlineUsers((prevState) => [...prevState, member.info.username]);
@@ -137,7 +106,6 @@ const VideoRoom: NextPage<Props> = ({username}) => {
                 duration: 4000,
                 isClosable: true,
             })
-            setOnlineUsersCount(channel.members.count);
             setOnlineUsers((prevState) => [...prevState, member.info.username]);
             setPeers((prevState) => [
                 ...prevState,
@@ -159,8 +127,6 @@ const VideoRoom: NextPage<Props> = ({username}) => {
                     return e.peerId != member.id;
                 })
             );
-            // const {[member.id]: remove, ...rest} = peerMedia;
-            // setPeerMedia(rest);
             setPeerMedia((prevState) => {
                 const newData = {...prevState};
                 delete newData[member.id];
@@ -218,8 +184,6 @@ const VideoRoom: NextPage<Props> = ({username}) => {
                 peer.on("close", () => {
                     console.log("Peer Connection is Closed");
                 });
-
-                // await axios.post("/api/pusher/newmember", { userId });
             }
         }
 
@@ -235,11 +199,7 @@ const VideoRoom: NextPage<Props> = ({username}) => {
             if (peerInstance.current) {
                 const mediaConnection = peerInstance.current.call(remotePeerId, stream);
                 mediaConnection.on("stream", function (remoteStream: MediaStream) {
-                    // remotePeerInstance.current.srcObject = remoteStream;
-                    // setPeerMedia((prevState) =>
-                    //   [...prevState, remoteStream]);
                     setPeerMedia(prevState => ({...prevState, [remotePeerId]: remoteStream}))
-
                 });
             }
         }
