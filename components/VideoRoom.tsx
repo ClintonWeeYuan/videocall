@@ -19,6 +19,7 @@ import styles from "../styles/chat.module.css";
 import Message from '../components/Message'
 import OnlineStatus from './OnlineStatus'
 import ChatBox from './ChatBox'
+import ChatSender from './ChatSender'
 
 
 type Props = {
@@ -354,24 +355,7 @@ const VideoRoom: NextPage<Props> = ({username}) => {
                         Box</Heading>
                     <Flex direction="column" justify="center" align="space-between">
                         <ChatBox chats={chats} username={username}/>
-                        <Box sx={{height: "20vh", display: "flex"}}>
-                            <Input variant="flushed"
-                                   placeholder="Type your message here..."
-                                   value={message}
-                                   onChange={(e) => setMessage(e.target.value)} onKeyPress={(e) => {
-                                if (e.charCode === 13) {
-                                    axios.post("/api/pusher", {
-                                        message,
-                                        username,
-                                        channel: `presence-${router.query.room}`
-                                    });
-                                    setMessage('')
-                                }
-                                ;
-
-                            }}
-                            ></Input>
-                        </Box>
+                        <ChatSender username={username}/>
                     </Flex>
                 </Box>
             </GridItem>
