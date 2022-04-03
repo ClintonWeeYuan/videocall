@@ -143,7 +143,9 @@ const VideoRoom: NextPage<Props> = ({username}) => {
       console.log("User has left the Chat");
       setOnlineUsers([]);
       channel.members.each((member: any) => {
-        setOnlineUsers((prevState) => [...prevState, member.info.username]);
+        if(member.id != channel.members.me.id){
+          setOnlineUsers((prevState) => [...prevState, member.info.username]);
+        }
       });
       setPeers(peers.filter((e) => {
           return e.peerId != member.id;
