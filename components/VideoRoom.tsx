@@ -1,12 +1,6 @@
 import {NextPage} from "next";
 import {
-    Box, Text, Button, useToast, Grid, GridItem, Modal,
-    ModalOverlay,
-    ModalContent,
-    ModalHeader,
-    ModalFooter,
-    ModalBody,
-    ModalCloseButton, Flex, Heading
+    Box, useToast, Grid, GridItem, Flex, Heading
 } from '@chakra-ui/react';
 import Pusher from "pusher-js";
 import {useEffect, useRef, useState} from 'react'
@@ -18,6 +12,7 @@ import ChatBox from './ChatBox'
 import ChatSender from './ChatSender'
 import VideoContainer from './VideoContainer'
 import {getMedia} from '../lib/utils'
+import EnterRoomModal from "./EnterRoomModal";
 
 
 type Props = {
@@ -40,12 +35,10 @@ export interface ChatObject {
 
 const VideoRoom: NextPage<Props> = ({username}) => {
 
-
     //Online Users State
     const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
 
     //Peer and Video States
-    const [remotePeerId, setRemotePeerId] = useState<string[]>([]);
     const [userId, setUserId] = useState<string>("");
 
     // const [peerMedia, setPeerMedia] = useState<MediaStream[]>([]);
@@ -70,8 +63,8 @@ const VideoRoom: NextPage<Props> = ({username}) => {
         });
         console.log(`presence-${router.query.room}`)
         const channel: any = pusher.subscribe(`presence-${router.query.room}`);
-        //When user subscribes to channel
 
+        //When user subscribes to channel
         channel.bind("pusher:subscription_succeeded", (members: PusherTypes.Members) => {
             console.log("Subscribed to channel")
             toast({
@@ -90,11 +83,9 @@ const VideoRoom: NextPage<Props> = ({username}) => {
                         {peerId: member.id, username: member.info.username},
                     ]);
                 }
-
             });
             console.log(peers)
             setUserId(members.me.id);
-
         });
 
         //When new member joins the chat
@@ -203,62 +194,44 @@ const VideoRoom: NextPage<Props> = ({username}) => {
                 });
             }
         }
-
         call();
-
     };
 
-    const [isOpen, setIsOpen] = useState<boolean>(true);
     const callEveryone = () => {
         peers.forEach((peer) => {
                 console.log("Calling" + peer.username)
                 callPeer(peer.peerId);
             }
         );
-        setIsOpen(false);
     }
 
-    return <Box> <Modal isOpen={isOpen} onClose={() => setIsOpen(false)}>
-        <ModalOverlay/>
-        <ModalContent>
-            <ModalHeader>Modal Title</ModalHeader>
-            <ModalCloseButton/>
-            <ModalBody>
-                <Text>Would you like to enter the call?</Text>
-            </ModalBody>
-
-            <ModalFooter>
-                <Button colorScheme='blue' mr={3} onClick={callEveryone}>
-                    Join Audio
-                </Button>
-            </ModalFooter>
-        </ModalContent>
-    </Modal>
-        <Grid h='90vh'
-              templateRows='repeat(3, 1fr)'
-              templateColumns={{base: 'repeat(6, 1fr)', md: 'repeat(8, 1fr)'}}
-              gap={4}>
-            <GridItem display={{base: 'none', md: 'block'}} rowSpan={3} colSpan={1}>
-                <OnlineStatus onlineUsers={onlineUsers}/>
-            </GridItem>
-            <GridItem rowSpan={3} colSpan={5}>
-                <VideoContainer onlineUsers={onlineUsers} peerMedia={peerMedia}/>
-            </GridItem>
-            <GridItem display={{base: 'none', md: 'block'}} rowSpan={3}
-                      colSpan={2}>
-                <Box p={3}>
-                    <Heading sx={{textAlign: "center"}}
-                             size="medium">Chat
-                        Box</Heading>
-                    <Flex direction="column" justify="center" align="space-between">
-                        <ChatBox chats={chats} username={username}/>
-                        <ChatSender username={username}/>
-                    </Flex>
-                </Box>
-            </GridItem>
-        </Grid>
-
-
-    </Box>
+    return (
+        <Box>
+            <EnterRoomModal callEveryone={callEveryone}/>
+            <Grid h='90vh'
+                  templateRows='repeat(3, 1fr)'
+                  templateColumns={{base: 'repeat(6, 1fr)', md: 'repeat(8, 1fr)'}}
+                  gap={4}>
+                <GridItem display={{base: 'none', md: 'block'}} rowSpan={3} colSpan={1}>
+                    <OnlineStatus onlineUsers={onlineUsers}/>
+                </GridItem>
+                <GridItem rowSpan={3} colSpan={5}>
+                    <VideoContainer onlineUsers={onlineUsers} peerMedia={peerMedia}/>
+                </GridItem>
+                <GridItem display={{base: 'none', md: 'block'}} rowSpan={3}
+                          colSpan={2}>
+                    <Box p={3}>
+                        <Heading sx={{textAlign: "center"}}
+                                 size="medium">Chat
+                            Box</Heading>
+                        <Flex direction="column" justify="center" align="space-between">
+                            <ChatBox chats={chats} username={username}/>
+                            <ChatSender username={username}/>
+                        </Flex>
+                    </Box>
+                </GridItem>
+            </Grid>
+        </Box>
+    )
 }
 export default VideoRoom
