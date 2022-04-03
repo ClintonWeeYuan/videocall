@@ -20,6 +20,8 @@ import Message from '../components/Message'
 import OnlineStatus from './OnlineStatus'
 import ChatBox from './ChatBox'
 import ChatSender from './ChatSender'
+import VideoContainer from './VideoContainer'
+import {getMedia} from '../lib/utils'
 
 
 type Props = {
@@ -72,9 +74,12 @@ const VideoRoom: NextPage<Props> = ({username}) => {
     //Peer and Video States
     const [remotePeerId, setRemotePeerId] = useState<string[]>([]);
     const [userId, setUserId] = useState<string>("");
+
     // const [peerMedia, setPeerMedia] = useState<MediaStream[]>([]);
     const [peerMedia, setPeerMedia] = useState<PeerMediaStreams>({});
     const userVideo = useRef<HTMLVideoElement>(null);
+
+    // const [userVideo, setUserVideo] = useState<MediaStream>();
     const router = useRouter();
     const [peers, setPeers] = useState<PeerObject[]>([]);
     const peerInstance = useRef<any>();
@@ -243,34 +248,6 @@ const VideoRoom: NextPage<Props> = ({username}) => {
 
     };
 
-    //Get Media Stream Function
-    async function getMedia() {
-        let stream = null;
-        //   navigator.mediaDevices.webkitGetUserMedia ||
-        //   navigator.mediaDevices.mozGetUserMedia;
-        try {
-            stream = await navigator.mediaDevices.getUserMedia({
-                video: true,
-                audio: true,
-            });
-            return stream;
-        } catch (err) {
-            console.log(err);
-        }
-    }
-
-    //Gets User's Own Video Stream
-    useEffect(() => {
-        async function startMedia() {
-            const stream = await getMedia();
-            if (userVideo.current && stream) {
-                userVideo.current.srcObject = stream;
-            }
-        }
-
-        startMedia();
-    }, []);
-
     const [isOpen, setIsOpen] = useState<boolean>(true);
     const callEveryone = () => {
         peers.forEach((peer) => {
@@ -280,34 +257,6 @@ const VideoRoom: NextPage<Props> = ({username}) => {
         );
         setIsOpen(false);
     }
-
-    //Scroll to Bottom of ChatBox
-    const messagesEndRef = useRef<null | HTMLDivElement>(null);
-
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({behavior: "smooth"})
-    }
-
-    useEffect(() => {
-        scrollToBottom()
-    }, [chats]);
-
-    //Calculate grid columns
-    const [numColumns, setNumColumns] = useState<number>(1)
-    const [mobileNumColumns, setMobileNumColumns] = useState<number>(1)
-
-    useEffect(() => {
-        if (onlineUsers.length == 0) {
-            setNumColumns(1);
-            setMobileNumColumns(1);
-        } else if (onlineUsers.length == 1) {
-            setNumColumns(2);
-            setMobileNumColumns(2);
-        } else {
-            setNumColumns(3);
-            setMobileNumColumns(2);
-        }
-    }, [onlineUsers])
 
     return <Box> <Modal isOpen={isOpen} onClose={() => setIsOpen(false)}>
         <ModalOverlay/>
@@ -333,20 +282,8 @@ const VideoRoom: NextPage<Props> = ({username}) => {
                 <OnlineStatus onlineUsers={onlineUsers}/>
             </GridItem>
             <GridItem rowSpan={3} colSpan={5}>
-                <SimpleGrid columns={{base: mobileNumColumns, md: numColumns}} spacing='10px' p={50}>
-                    <Box bg='white' height='100%' maxH="400px" maxW="300px">
-                        <video ref={userVideo}
-                               autoPlay={true}
-                               height="100%"
-                               width="100%"
-                               muted={true} playsInline/>
-                    </Box>
-                    {Object.values(peerMedia).map((stream, index) => {
-                        return <Box bg="white" key={index} height='100%' maxH="400px" maxW="300px">
-                            <Video stream={stream}/>
-                        </Box>;
-                    })}
-                </SimpleGrid></GridItem>
+                <VideoContainer onlineUsers={onlineUsers} peerMedia={peerMedia}/>
+            </GridItem>
             <GridItem display={{base: 'none', md: 'block'}} rowSpan={3}
                       colSpan={2}>
                 <Box p={3}>
@@ -364,5 +301,4 @@ const VideoRoom: NextPage<Props> = ({username}) => {
 
     </Box>
 }
-
 export default VideoRoom

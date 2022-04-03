@@ -1,10 +1,8 @@
 import {NextPage} from "next";
-import {Box, Flex, Heading, Input, List, ListIcon, ListItem} from "@chakra-ui/react";
-import {CheckCircleIcon} from "@chakra-ui/icons";
+import {Box} from "@chakra-ui/react";
 import styles from "../styles/chat.module.css";
 import Message from "./Message";
-import axios from "axios";
-import {useRef} from "react";
+import {useEffect, useRef} from "react";
 
 interface ChatObject {
     message: string;
@@ -24,6 +22,10 @@ const ChatBox: NextPage<Props> = ({chats, username}) => {
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({behavior: "smooth"})
     }
+
+    useEffect(() => {
+        scrollToBottom()
+    }, [chats]);
 
     return (
             <Box className={styles.chat} sx={{height: "50vh", overflowY: "scroll"}}>

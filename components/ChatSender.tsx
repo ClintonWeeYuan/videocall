@@ -1,10 +1,7 @@
 import {NextPage} from "next";
-import {Box, Flex, Heading, Input, List, ListIcon, ListItem} from "@chakra-ui/react";
-import {CheckCircleIcon} from "@chakra-ui/icons";
-import styles from "../styles/chat.module.css";
-import Message from "./Message";
+import {Box, Input} from "@chakra-ui/react";
 import axios from "axios";
-import {useRef, useState} from "react";
+import {useState} from "react";
 import {useRouter} from 'next/router'
 
 type Props = {
@@ -29,9 +26,8 @@ const ChatSender: NextPage<Props> = ({username}) => {
                     });
                     setMessage('')
                 }
-                ;
             }}
-            ></Input>
+            />
         </Box>
     )
 }
