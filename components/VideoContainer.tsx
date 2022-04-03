@@ -50,10 +50,8 @@ const VideoContainer: NextPage<Props> = ({onlineUsers, peerMedia}) => {
                 userVideo.current.srcObject = stream;
             }
         }
-
         startMedia();
     }, []);
-
 
     useEffect(() => {
         if (onlineUsers.length == 0) {

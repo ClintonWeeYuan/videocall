@@ -1,7 +1,5 @@
 import {NextPage} from "next";
-import {
-    Box, useToast, Grid, GridItem, Flex, Heading
-} from '@chakra-ui/react';
+import {Box, useToast, Grid, GridItem, Flex, Heading} from '@chakra-ui/react';
 import Pusher from "pusher-js";
 import {useEffect, useRef, useState} from 'react'
 import {useRouter} from 'next/router'
@@ -13,7 +11,7 @@ import ChatSender from './ChatSender'
 import VideoContainer from './VideoContainer'
 import {getMedia} from '../lib/utils'
 import EnterRoomModal from "./EnterRoomModal";
-
+import {createPeer} from "../lib/utils"
 
 type Props = {
     username: string;
@@ -71,13 +69,12 @@ const VideoRoom: NextPage<Props> = ({username}) => {
                 title: 'Entered Room',
                 description: "You have successfully entered the room!",
                 status: 'success',
-                duration: 4000,
+                duration: 2000,
                 isClosable: true,
             })
             members.each((member: any) => {
                 if (member.id != members.me.id) {
                     setOnlineUsers((prevState) => [...prevState, member.info.username]);
-
                     setPeers((prevState) => [
                         ...prevState,
                         {peerId: member.id, username: member.info.username},
@@ -94,7 +91,7 @@ const VideoRoom: NextPage<Props> = ({username}) => {
                 title: 'New Member',
                 description: `${member.info.username} has entered the room!`,
                 status: 'success',
-                duration: 4000,
+                duration: 2000,
                 isClosable: true,
             })
             setOnlineUsers((prevState) => [...prevState, member.info.username]);
@@ -130,55 +127,16 @@ const VideoRoom: NextPage<Props> = ({username}) => {
             const {message, username} = data;
             setChats((prevState) => [...prevState, {username, message}]);
             console.log("Message Received");
-            console.log(chats);
         });
 
         return () => {
             pusher.unsubscribe(`presence-${router.query.room}`);
-
         };
     }, []);
 
     //Creates own Peer Id from Member Id
     useEffect(() => {
-        async function createPeer() {
-            if (userId) {
-                const peer = new Peer(userId, {
-                    host: 'peerjs-server-videocall.herokuapp.com',
-                    port: 443,
-                    secure: true,
-                });
-                peerInstance.current = peer;
-                peer.on("open", (id) => {
-                    console.log("My peer id is " + id);
-                });
-
-                peer.on("call", async function (call) {
-                    console.log("Someone is attempting to call you");
-                    const stream = await getMedia();
-                    call.answer(stream);
-                    call.on("stream", function (remoteStream) {
-                        // remotePeerInstance.current.srcObject = remoteStream;
-                        setPeerMedia(prevState => ({...prevState, [call.peer]: remoteStream}))
-                    });
-
-                });
-
-                peer.on("error", (err) => {
-                    console.log(err);
-                });
-
-                peer.on("disconnected", () => {
-                    console.log("Peer connection disconnected");
-                });
-
-                peer.on("close", () => {
-                    console.log("Peer Connection is Closed");
-                });
-            }
-        }
-
-        createPeer();
+        createPeer(userId, peerInstance, setPeerMedia);
     }, [userId]);
 
     //Call People Function
@@ -222,8 +180,9 @@ const VideoRoom: NextPage<Props> = ({username}) => {
                           colSpan={2}>
                     <Box p={3}>
                         <Heading sx={{textAlign: "center"}}
-                                 size="medium">Chat
-                            Box</Heading>
+                                                                   size="medium">
+                        Chat Box
+                    </Heading>
                         <Flex direction="column" justify="center" align="space-between">
                             <ChatBox chats={chats} username={username}/>
                             <ChatSender username={username}/>
