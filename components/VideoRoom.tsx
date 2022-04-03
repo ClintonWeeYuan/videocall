@@ -18,6 +18,7 @@ import axios from "axios";
 import styles from "../styles/chat.module.css";
 import Message from '../components/Message'
 import OnlineStatus from './OnlineStatus'
+import ChatBox from './ChatBox'
 
 
 type Props = {
@@ -328,18 +329,6 @@ const VideoRoom: NextPage<Props> = ({username}) => {
               templateColumns={{base: 'repeat(6, 1fr)', md: 'repeat(8, 1fr)'}}
               gap={4}>
             <GridItem display={{base: 'none', md: 'block'}} rowSpan={3} colSpan={1}>
-                {/*<Flex direction="column" justify="center"*/}
-                {/*      align="center"><Heading*/}
-                {/*    size="medium"*/}
-                {/*    p={5}>Online*/}
-                {/*    Users</Heading><List spacing={3} p={3}>*/}
-                {/*    {onlineUsers.map((onlineUser, index) => <ListItem key={index}> <ListIcon as={CheckCircleIcon}*/}
-                {/*                                                                             color='green.500'/>*/}
-                {/*        {onlineUser}</ListItem>)}*/}
-
-                {/*    /!* You can also use custom icons from react-icons *!/*/}
-
-                {/*</List></Flex>*/}
                 <OnlineStatus onlineUsers={onlineUsers}/>
             </GridItem>
             <GridItem rowSpan={3} colSpan={5}>
@@ -364,14 +353,7 @@ const VideoRoom: NextPage<Props> = ({username}) => {
                              size="medium">Chat
                         Box</Heading>
                     <Flex direction="column" justify="center" align="space-between">
-                        <Box className={styles.chat} sx={{height: "50vh", overflowY: "scroll"}}
-                        >
-                            {chats.map((chat, id) => {
-                                return <Message key={id} username={username} sender={chat.username}
-                                                message={chat.message}/>
-                            })}
-                            <div ref={messagesEndRef}/>
-                        </Box>
+                        <ChatBox chats={chats} username={username}/>
                         <Box sx={{height: "20vh", display: "flex"}}>
                             <Input variant="flushed"
                                    placeholder="Type your message here..."
