@@ -15,7 +15,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   
   try {
     const auth = pusher.authenticate(socket_id, channel_name, presenceData);
-    console.log("Hello")
     res.send(auth);
   }
   
